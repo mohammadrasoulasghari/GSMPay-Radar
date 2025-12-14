@@ -19,7 +19,6 @@ class PrReportInfolist
                     ->label(__('pr_report.pr_details'))
                     ->placeholder('Untitled PR')
                     ->weight(FontWeight::Bold)
-                    ->size(TextEntry\TextEntrySize::Large)
                     ->suffixAction(
                         Action::make('view_github')
                             ->label(__('pr_report.view_on_github'))
@@ -137,8 +136,7 @@ class PrReportInfolist
                     ->label(__('pr_report.badges_earned'))
                     ->schema([
                         TextEntry::make('name')
-                            ->weight(FontWeight::Bold)
-                            ->size(TextEntry\TextEntrySize::Large),
+                            ->weight(FontWeight::Bold),
                         TextEntry::make('icon'),
                         TextEntry::make('reason_fa')
                             ->color('gray'),
