@@ -22,11 +22,11 @@ class PrReportResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static ?string $navigationLabel = 'PR Reports';
+    protected static ?string $navigationLabel = 'گزارش‌های PR';
     
-    protected static ?string $modelLabel = 'PR Report';
+    protected static ?string $modelLabel = 'گزارش PR';
     
-    protected static ?string $pluralModelLabel = 'PR Reports';
+    protected static ?string $pluralModelLabel = 'گزارش‌های PR';
 
     protected static ?string $recordTitleAttribute = 'title';
 

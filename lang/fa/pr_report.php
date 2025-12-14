@@ -53,4 +53,18 @@ return [
     'style' => 'استایل',
     'test' => 'تست',
     'chore' => 'امور عمومی',
+    
+    // Resource labels
+    'pr_reports' => 'گزارش‌های PR',
+    'pr_report' => 'گزارش PR',
+    
+    // Table and form fields
+    'repository' => 'مخزن',
+    'pr_number' => 'شماره PR',
+    'pr_link' => 'لینک PR',
+    'title' => 'عنوان',
+    'created_at' => 'تاریخ ایجاد',
+    'updated_at' => 'آخرین بروزرسانی',
+    'raw_analysis' => 'تحلیل خام',
+    'untitled_pr' => 'PR بدون عنوان',
 ];

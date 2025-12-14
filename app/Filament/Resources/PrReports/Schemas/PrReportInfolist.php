@@ -17,7 +17,7 @@ class PrReportInfolist
                 // PR Title with action
                 TextEntry::make('title')
                     ->label(__('pr_report.pr_details'))
-                    ->placeholder('Untitled PR')
+                    ->placeholder(__('pr_report.untitled_pr'))
                     ->weight(FontWeight::Bold)
                     ->suffixAction(
                         Action::make('view_github')
