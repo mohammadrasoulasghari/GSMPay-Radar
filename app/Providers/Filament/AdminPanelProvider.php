@@ -31,8 +31,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('GSMPay Radar')
             ->login()
             ->colors([
-                'primary' => Color::Red,
-                'orange' => Color::Orange,
+                'primary' => Color::Sky,
+                'info' => Color::Blue,
                 'gray' => Color::Slate,
             ])
             ->font('Vazirmatn', provider: GoogleFontProvider::class)
