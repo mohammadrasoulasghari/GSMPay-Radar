@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Filament\Resources\PrReports\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+
+class PrReportsTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('developer.name')
+                    ->searchable(),
+                TextColumn::make('repository')
+                    ->searchable(),
+                TextColumn::make('pr_number')
+                    ->searchable(),
+                TextColumn::make('pr_link')
+                    ->searchable(),
+                TextColumn::make('title')
+                    ->searchable(),
+                TextColumn::make('business_value_score')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('solid_compliance_score')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('tone_score')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('health_status')
+                    ->searchable(),
+                TextColumn::make('risk_level')
+                    ->searchable(),
+                TextColumn::make('change_type')
+                    ->searchable(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}

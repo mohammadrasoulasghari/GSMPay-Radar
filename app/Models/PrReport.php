@@ -114,4 +114,132 @@ class PrReport extends Model
             'raw_analysis' => $aiAnalysis,
         ]);
     }
+
+    /**
+     * Get color for health status (for Filament badge).
+     */
+    public function getHealthColor(): string
+    {
+        return match($this->health_status) {
+            'healthy' => 'success',
+            'warning' => 'warning',
+            'critical', 'danger' => 'danger',
+            default => 'gray',
+        };
+    }
+
+    /**
+     * Get color for risk level (for Filament badge).
+     */
+    public function getRiskColor(): string
+    {
+        return match($this->risk_level) {
+            'low' => 'success',
+            'medium' => 'warning',
+            'high' => 'danger',
+            default => 'gray',
+        };
+    }
+
+    /**
+     * Get color for business value score (for Filament badge).
+     */
+    public function getBusinessValueColor(): string
+    {
+        $score = $this->business_value_score ?? 0;
+        return match(true) {
+            $score < 50 => 'danger',
+            $score < 80 => 'warning',
+            default => 'success',
+        };
+    }
+
+    /**
+     * Get color for SOLID compliance score (for Filament badge).
+     */
+    public function getSolidColor(): string
+    {
+        $score = $this->solid_compliance_score ?? 0;
+        return match(true) {
+            $score < 50 => 'danger',
+            $score < 80 => 'warning',
+            default => 'success',
+        };
+    }
+
+    /**
+     * Get color for tone score (for reviewer analysis).
+     */
+    public static function getToneScoreColor(float $score): string
+    {
+        return match(true) {
+            $score < 5 => 'danger',
+            $score < 7 => 'warning',
+            default => 'success',
+        };
+    }
+
+    /**
+     * Get badges from raw_analysis with fallback.
+     */
+    public function getBadges(): array
+    {
+        return $this->raw_analysis['badges'] ?? [];
+    }
+
+    /**
+     * Get recurring mistakes from raw_analysis with fallback.
+     */
+    public function getRecurringMistakes(): array
+    {
+        return $this->raw_analysis['recurring_mistakes'] ?? [];
+    }
+
+    /**
+     * Get educational path from raw_analysis with fallback.
+     */
+    public function getEducationalPath(): array
+    {
+        return $this->raw_analysis['educational_path'] ?? [];
+    }
+
+    /**
+     * Get reviewers analytics from raw_analysis with fallback.
+     */
+    public function getReviewersAnalytics(): array
+    {
+        return $this->raw_analysis['reviewers_analytics'] ?? [];
+    }
+
+    /**
+     * Get refactoring suggestions from raw_analysis with fallback.
+     */
+    public function getRefactoringSuggestions(): array
+    {
+        return $this->raw_analysis['suggestions_for_refactor'] ?? [];
+    }
+
+    /**
+     * Check if over-engineering is detected.
+     */
+    public function isOverEngineered(): bool
+    {
+        return ($this->raw_analysis['over_engineering'] ?? false) === true;
+    }
+
+    /**
+     * Get test coverage percentage from raw_analysis.
+     */
+    public function getTestCoverage(): ?int
+    {
+        return $this->raw_analysis['test_coverage_percentage'] ?? null;
+    }
+
+    /**
+     * Get velocity from raw_analysis.
+     */
+    public function getVelocity(): ?string
+    {
+        return $this->raw_analysis['velocity'] ?? null;
+    }
 }
