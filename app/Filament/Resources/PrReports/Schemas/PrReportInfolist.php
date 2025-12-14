@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\PrReports\Schemas;
 
-use Filament\Infolists\Components\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
@@ -154,7 +154,6 @@ class PrReportInfolist
                     ->label(false)
                     ->formatStateUsing(fn () => __('pr_report.no_badges'))
                     ->color('gray')
-                    ->italic()
                     ->hidden(fn ($record) => !empty($record->getBadges()))
                     ->columnSpanFull(),
 
@@ -188,7 +187,6 @@ class PrReportInfolist
                     ->label(false)
                     ->formatStateUsing(fn () => __('pr_report.no_reviewer_feedback'))
                     ->color('gray')
-                    ->italic()
                     ->hidden(fn ($record) => !empty($record->getReviewersAnalytics()))
                     ->columnSpanFull(),
 
