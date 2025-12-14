@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PrReports\Schemas;
 
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -33,8 +34,11 @@ class PrReportForm
                 TextInput::make('health_status'),
                 TextInput::make('risk_level'),
                 TextInput::make('change_type'),
-                TextInput::make('raw_analysis')
-                    ->required(),
+                Textarea::make('raw_analysis')
+                    ->required()
+                    ->formatStateUsing(fn ($state) => json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))
+                    ->dehydrateStateUsing(fn ($state) => json_decode($state, true))
+                    ->rows(10),
             ]);
     }
 }

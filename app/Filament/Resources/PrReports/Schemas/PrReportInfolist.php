@@ -2,18 +2,19 @@
 
 namespace App\Filament\Resources\PrReports\Schemas;
 
-use Filament\Infolists\Components\Actions\Action;
-use Filament\Infolists\Components\Fieldset;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Group;
+
+use Filament\Actions\Action;
 use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Split;
-use Filament\Infolists\Components\Tabs;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\Layout\Split;
 
 class PrReportInfolist
 {
@@ -21,16 +22,13 @@ class PrReportInfolist
     {
         return $schema
             ->components([
-                // Section 1: Executive Header
                 Section::make(__('pr_report.executive_header'))
                     ->schema([
-                        // PR Title with link action
                         Split::make([
                             TextEntry::make('title')
                                 ->label(__('pr_report.pr_details'))
                                 ->placeholder('Untitled PR')
-                                ->weight(FontWeight::Bold)
-                                ->size(TextEntry\TextEntrySize::Large),
+                                ->weight(FontWeight::Bold),
                             TextEntry::make('pr_link')
                                 ->label(false)
                                 ->formatStateUsing(fn () => '')
@@ -166,7 +164,7 @@ class PrReportInfolist
                         Tabs::make('sections')
                             ->tabs([
                                 // Badges Tab
-                                Tabs\Tab::make(__('pr_report.badges_earned'))
+                                Tab::make(__('pr_report.badges_earned'))
                                     ->schema([
                                         RepeatableEntry::make('badges')
                                             ->label(false)
@@ -175,8 +173,7 @@ class PrReportInfolist
                                                     ->schema([
                                                         TextEntry::make('name')
                                                             ->label(false)
-                                                            ->weight(FontWeight::Bold)
-                                                            ->size(TextEntry\TextEntrySize::Large),
+                                                            ->weight(FontWeight::Bold),
                                                         TextEntry::make('icon')
                                                             ->label(false),
                                                         TextEntry::make('reason_fa')
@@ -194,11 +191,9 @@ class PrReportInfolist
                                             ->label(false)
                                             ->formatStateUsing(fn () => __('pr_report.no_badges'))
                                             ->color('gray')
-                                            ->italic()
                                             ->hidden(fn ($record) => !empty($record->getBadges())),
                                     ]),
 
-                                // Reviewers Tab
                                 Tabs\Tab::make(__('pr_report.reviewers'))
                                     ->schema([
                                         RepeatableEntry::make('reviewers')
@@ -232,7 +227,6 @@ class PrReportInfolist
                                             ->label(false)
                                             ->formatStateUsing(fn () => __('pr_report.no_reviewer_feedback'))
                                             ->color('gray')
-                                            ->italic()
                                             ->hidden(fn ($record) => !empty($record->getReviewersAnalytics())),
                                     ]),
                             ]),

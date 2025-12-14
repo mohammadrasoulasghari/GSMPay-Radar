@@ -9,12 +9,22 @@ use App\Filament\Resources\Developers\Pages\ViewDeveloper;
 use App\Filament\Resources\Developers\RelationManagers\PrReportsRelationManager;
 use App\Models\Developer;
 use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
+use Filament\Tables\Columns\Layout\Grid;
 use Filament\Tables\Table;
 
 class DeveloperResource extends Resource
@@ -90,12 +100,12 @@ class DeveloperResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -104,21 +114,21 @@ class DeveloperResource extends Resource
     {
         return $schema
             ->components([
-                Infolists\Components\Section::make(__('developer.profile_info'))
+                Section::make(__('developer.profile_info'))
                     ->schema([
-                        Infolists\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                Infolists\Components\ImageEntry::make('avatar_url')
+                                ImageEntry::make('avatar_url')
                                     ->label('')
                                     ->circular()
                                     ->size(80)
                                     ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name ?? $record->username)),
-                                Infolists\Components\Group::make([
-                                    Infolists\Components\TextEntry::make('name')
+                                Group::make([
+                                    TextEntry::make('name')
                                         ->label(__('developer.name'))
-                                        ->size(Infolists\Components\TextEntry\TextEntrySize::Large)
+//                                        ->size(TextEntrySize::Large)
                                         ->weight('bold'),
-                                    Infolists\Components\TextEntry::make('username')
+                                    TextEntry::make('username')
                                         ->label(__('developer.username'))
                                         ->icon('heroicon-o-at-symbol')
                                         ->url(fn ($record) => "https://github.com/{$record->username}")
