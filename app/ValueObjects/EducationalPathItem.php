@@ -4,7 +4,10 @@ namespace App\ValueObjects;
 
 use JsonSerializable;
 
-class EducationalRecommendation implements JsonSerializable
+/**
+ * Single educational path item.
+ */
+class EducationalPathItem implements JsonSerializable
 {
     public function __construct(
         public readonly string $topic,
@@ -12,8 +15,16 @@ class EducationalRecommendation implements JsonSerializable
         public readonly ?string $link = null,
     ) {}
 
-    public static function fromArray(array $data): self
+    public static function fromArray(?array $data): self
     {
+        if (empty($data)) {
+            return new self(
+                topic: '',
+                reason: '',
+                link: null,
+            );
+        }
+
         return new self(
             topic: $data['topic'] ?? '',
             reason: $data['reason'] ?? '',
@@ -23,10 +34,10 @@ class EducationalRecommendation implements JsonSerializable
 
     public function jsonSerialize(): array
     {
-        return [
+        return array_filter([
             'topic' => $this->topic,
             'reason' => $this->reason,
             'link' => $this->link,
-        ];
+        ], fn($v) => $v !== null && $v !== '');
     }
 }

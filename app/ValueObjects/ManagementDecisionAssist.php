@@ -4,60 +4,56 @@ namespace App\ValueObjects;
 
 use JsonSerializable;
 
+/**
+ * Management decision assist.
+ * Required fields: final_verdict_fa, performance_review_topic
+ */
 class ManagementDecisionAssist implements JsonSerializable
 {
     public function __construct(
-        public readonly bool $approved,
-        public readonly float $confidence,
-        public readonly array $priorities,
-        public readonly string $recommendation,
-        public readonly array $risks,
+        public readonly string $finalVerdictFa,
+        public readonly string $performanceReviewTopic,
+        public readonly bool $hrFlag,
     ) {}
 
-    public static function fromArray(array $data): self
+    public static function fromArray(?array $data): self
     {
+        if (empty($data)) {
+            return new self(
+                finalVerdictFa: '',
+                performanceReviewTopic: '',
+                hrFlag: false,
+            );
+        }
+
         return new self(
-            approved: (bool) ($data['approved'] ?? false),
-            confidence: (float) ($data['confidence'] ?? 0.0),
-            priorities: $data['priorities'] ?? [],
-            recommendation: $data['recommendation'] ?? '',
-            risks: $data['risks'] ?? [],
+            finalVerdictFa: $data['final_verdict_fa'] ?? '',
+            performanceReviewTopic: $data['performance_review_topic'] ?? '',
+            hrFlag: (bool) ($data['hr_flag'] ?? false),
         );
     }
 
     public function jsonSerialize(): array
     {
         return [
-            'approved' => $this->approved,
-            'confidence' => $this->confidence,
-            'priorities' => $this->priorities,
-            'recommendation' => $this->recommendation,
-            'risks' => $this->risks,
+            'final_verdict_fa' => $this->finalVerdictFa,
+            'performance_review_topic' => $this->performanceReviewTopic,
+            'hr_flag' => $this->hrFlag,
         ];
     }
 
-    public function getConfidenceLevel(): string
+    public function getHrFlagColor(): string
     {
-        return match (true) {
-            $this->confidence >= 0.9 => 'high',
-            $this->confidence >= 0.7 => 'medium',
-            $this->confidence >= 0.5 => 'low',
-            default => 'very_low',
-        };
+        return $this->hrFlag ? 'danger' : 'success';
     }
 
-    public function getConfidenceColor(): string
+    public function hasVerdict(): bool
     {
-        return match ($this->getConfidenceLevel()) {
-            'high' => 'success',
-            'medium' => 'info',
-            'low' => 'warning',
-            'very_low' => 'danger',
-        };
+        return !empty($this->finalVerdictFa);
     }
 
-    public function getRecommendationColor(): string
+    public function hasPerformanceReviewTopic(): bool
     {
-        return $this->approved ? 'success' : 'danger';
+        return !empty($this->performanceReviewTopic);
     }
 }

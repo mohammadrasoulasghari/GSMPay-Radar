@@ -4,29 +4,33 @@ namespace App\ValueObjects;
 
 use JsonSerializable;
 
+/**
+ * Meta data about the analysis.
+ */
 class MetaData implements JsonSerializable
 {
     public function __construct(
         public readonly ?string $analysisTimestamp = null,
         public readonly ?string $modelVersion = null,
-        public readonly float $confidenceLevel = 0.0,
     ) {}
 
-    public static function fromArray(array $data): self
+    public static function fromArray(?array $data): self
     {
+        if (empty($data)) {
+            return new self();
+        }
+
         return new self(
             analysisTimestamp: $data['analysis_timestamp'] ?? null,
-            modelVersion: $data['model_version'] ?? $data['ai_model_version'] ?? null,
-            confidenceLevel: (float) ($data['confidence_level'] ?? 0.0),
+            modelVersion: $data['model_version'] ?? null,
         );
     }
 
     public function jsonSerialize(): array
     {
-        return [
+        return array_filter([
             'analysis_timestamp' => $this->analysisTimestamp,
             'model_version' => $this->modelVersion,
-            'confidence_level' => $this->confidenceLevel,
-        ];
+        ], fn($v) => $v !== null);
     }
 }

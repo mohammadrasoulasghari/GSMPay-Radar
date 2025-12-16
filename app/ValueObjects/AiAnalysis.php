@@ -3,91 +3,175 @@
 namespace App\ValueObjects;
 
 use JsonSerializable;
+use Throwable;
 
+/**
+ * Main AI Analysis Value Object.
+ * This represents the complete analysis response from the AI.
+ * 
+ * Required fields in schema:
+ * - executive_summary
+ * - classification
+ * - author_analytics
+ * - reviewers_analytics
+ * - gamification_badges
+ * - management_decision_assist
+ */
 class AiAnalysis implements JsonSerializable
 {
     public function __construct(
-        public readonly MetaData $metaData,
         public readonly ExecutiveSummary $executiveSummary,
         public readonly Classification $classification,
         public readonly AuthorAnalytics $authorAnalytics,
-        public readonly QualityMetrics $qualityMetrics,
-        public readonly VelocityMetrics $velocityMetrics,
-        public readonly TrendAnalysis $trendAnalysis,
-        public readonly EducationalRecommendation $educationalRecommendation,
         public readonly array $reviewersAnalytics, // ReviewerAnalytics[]
-        public readonly EngagementMetrics $engagementMetrics,
-        public readonly BehavioralMetrics $behavioralMetrics,
-        public readonly CategoryBreakdown $categoryBreakdown,
-        public readonly FeedbackSamples $feedbackSamples,
         public readonly array $gamificationBadges, // GamificationBadge[]
-        public readonly TechnicalDebtAnalysis $technicalDebtAnalysis,
         public readonly ManagementDecisionAssist $managementDecisionAssist,
+        public readonly ?MetaData $metaData = null,
+        public readonly ?TechnicalDebtAnalysis $technicalDebtAnalysis = null,
     ) {}
 
-    public static function fromArray(array $data): self
+    /**
+     * Create AiAnalysis from array with full error handling.
+     * Returns null if data is empty or invalid.
+     */
+    public static function fromArray(?array $data): ?self
     {
-        return new self(
-            metaData: MetaData::fromArray($data['meta_data'] ?? []),
-            executiveSummary: ExecutiveSummary::fromArray($data['executive_summary'] ?? []),
-            classification: Classification::fromArray($data['classification'] ?? []),
-            authorAnalytics: AuthorAnalytics::fromArray($data['author_analytics'] ?? []),
-            qualityMetrics: QualityMetrics::fromArray($data['quality_metrics'] ?? []),
-            velocityMetrics: VelocityMetrics::fromArray($data['velocity_metrics'] ?? []),
-            trendAnalysis: TrendAnalysis::fromArray($data['trend_analysis'] ?? []),
-            educationalRecommendation: EducationalRecommendation::fromArray($data['educational_recommendation'] ?? []),
-            reviewersAnalytics: array_map(
-                fn($reviewer) => ReviewerAnalytics::fromArray($reviewer),
-                $data['reviewers_analytics'] ?? []
-            ),
-            engagementMetrics: EngagementMetrics::fromArray($data['engagement_metrics'] ?? []),
-            behavioralMetrics: BehavioralMetrics::fromArray($data['behavioral_metrics'] ?? []),
-            categoryBreakdown: CategoryBreakdown::fromArray($data['category_breakdown'] ?? []),
-            feedbackSamples: FeedbackSamples::fromArray($data['feedback_samples'] ?? []),
-            gamificationBadges: array_map(
-                fn($badge) => GamificationBadge::fromArray($badge),
-                $data['gamification_badges'] ?? []
-            ),
-            technicalDebtAnalysis: TechnicalDebtAnalysis::fromArray($data['technical_debt_analysis'] ?? []),
-            managementDecisionAssist: ManagementDecisionAssist::fromArray($data['management_decision_assist'] ?? []),
-        );
+        if (empty($data)) {
+            return null;
+        }
+
+        try {
+            // Parse reviewers analytics safely
+            $reviewersAnalytics = [];
+            if (!empty($data['reviewers_analytics']) && is_array($data['reviewers_analytics'])) {
+                foreach ($data['reviewers_analytics'] as $reviewer) {
+                    if (is_array($reviewer)) {
+                        $reviewersAnalytics[] = ReviewerAnalytics::fromArray($reviewer);
+                    }
+                }
+            }
+
+            // Parse gamification badges safely
+            $gamificationBadges = [];
+            if (!empty($data['gamification_badges']) && is_array($data['gamification_badges'])) {
+                foreach ($data['gamification_badges'] as $badge) {
+                    if (is_array($badge)) {
+                        $gamificationBadges[] = GamificationBadge::fromArray($badge);
+                    }
+                }
+            }
+
+            return new self(
+                executiveSummary: ExecutiveSummary::fromArray($data['executive_summary'] ?? null),
+                classification: Classification::fromArray($data['classification'] ?? null),
+                authorAnalytics: AuthorAnalytics::fromArray($data['author_analytics'] ?? null),
+                reviewersAnalytics: $reviewersAnalytics,
+                gamificationBadges: $gamificationBadges,
+                managementDecisionAssist: ManagementDecisionAssist::fromArray($data['management_decision_assist'] ?? null),
+                metaData: isset($data['meta_data']) ? MetaData::fromArray($data['meta_data']) : null,
+                technicalDebtAnalysis: isset($data['technical_debt_analysis']) 
+                    ? TechnicalDebtAnalysis::fromArray($data['technical_debt_analysis']) 
+                    : null,
+            );
+        } catch (Throwable $e) {
+            // Log error if needed, return null for safety
+            report($e);
+            return null;
+        }
     }
 
     public function jsonSerialize(): array
     {
-        return [
-            'meta_data' => $this->metaData,
+        $result = [
             'executive_summary' => $this->executiveSummary,
             'classification' => $this->classification,
             'author_analytics' => $this->authorAnalytics,
-            'quality_metrics' => $this->qualityMetrics,
-            'velocity_metrics' => $this->velocityMetrics,
-            'trend_analysis' => $this->trendAnalysis,
-            'educational_recommendation' => $this->educationalRecommendation,
             'reviewers_analytics' => $this->reviewersAnalytics,
-            'engagement_metrics' => $this->engagementMetrics,
-            'behavioral_metrics' => $this->behavioralMetrics,
-            'category_breakdown' => $this->categoryBreakdown,
-            'feedback_samples' => $this->feedbackSamples,
             'gamification_badges' => $this->gamificationBadges,
-            'technical_debt_analysis' => $this->technicalDebtAnalysis,
             'management_decision_assist' => $this->managementDecisionAssist,
         ];
+
+        if ($this->metaData !== null) {
+            $result['meta_data'] = $this->metaData;
+        }
+
+        if ($this->technicalDebtAnalysis !== null) {
+            $result['technical_debt_analysis'] = $this->technicalDebtAnalysis;
+        }
+
+        return $result;
     }
 
     public function toArray(): array
     {
-        return $this->jsonSerialize();
+        return json_decode(json_encode($this->jsonSerialize()), true);
     }
 
-    public function getOverallRiskColor(): string
+    // === Helper methods ===
+
+    public function getHealthStatus(): string
+    {
+        return $this->executiveSummary->overallHealthStatus;
+    }
+
+    public function getHealthColor(): string
+    {
+        return $this->executiveSummary->getHealthColor();
+    }
+
+    public function getRiskLevel(): string
+    {
+        return $this->classification->riskLevel;
+    }
+
+    public function getRiskColor(): string
     {
         return $this->classification->getRiskColor();
     }
 
-    public function getQualityColor(): string
+    public function getChangeType(): string
     {
-        return $this->qualityMetrics->getQualityColor();
+        return $this->classification->changeType;
+    }
+
+    public function isBlocking(): bool
+    {
+        return $this->classification->isBlocking;
+    }
+
+    public function getBusinessValueClarity(): int
+    {
+        return $this->executiveSummary->businessValueClarity;
+    }
+
+    public function getSolidCompliance(): int
+    {
+        return $this->authorAnalytics->qualityMetrics->solidCompliance;
+    }
+
+    public function getAuthorIdentity(): string
+    {
+        return $this->authorAnalytics->identity;
+    }
+
+    public function getEducationalPath(): array
+    {
+        return $this->authorAnalytics->educationalPath;
+    }
+
+    public function getRecurringMistakes(): array
+    {
+        return $this->authorAnalytics->trendAnalysis->recurringMistakes;
+    }
+
+    public function getReviewers(): array
+    {
+        return $this->reviewersAnalytics;
+    }
+
+    public function getReviewersCount(): int
+    {
+        return count($this->reviewersAnalytics);
     }
 
     public function hasGamificationBadges(): bool
@@ -95,8 +179,51 @@ class AiAnalysis implements JsonSerializable
         return !empty($this->gamificationBadges);
     }
 
-    public function getTotalScore(): float
+    public function getBadgesCount(): int
     {
-        return $this->qualityMetrics->score;
+        return count($this->gamificationBadges);
+    }
+
+    public function hasTechnicalDebt(): bool
+    {
+        return $this->technicalDebtAnalysis !== null 
+            && $this->technicalDebtAnalysis->addedDebtLevel !== 'none';
+    }
+
+    public function isOverEngineered(): bool
+    {
+        return $this->technicalDebtAnalysis?->overEngineeringDetected ?? false;
+    }
+
+    public function getRefactorSuggestions(): array
+    {
+        return $this->technicalDebtAnalysis?->suggestionsForRefactor ?? [];
+    }
+
+    public function requiresHrAttention(): bool
+    {
+        return $this->managementDecisionAssist->hrFlag;
+    }
+
+    public function getFinalVerdict(): string
+    {
+        return $this->managementDecisionAssist->finalVerdictFa;
+    }
+
+    /**
+     * Calculate average tone score from all reviewers.
+     */
+    public function getAverageToneScore(): float
+    {
+        if (empty($this->reviewersAnalytics)) {
+            return 0.0;
+        }
+
+        $scores = array_map(
+            fn(ReviewerAnalytics $r) => $r->behavioralMetrics->toneScore,
+            $this->reviewersAnalytics
+        );
+
+        return round(array_sum($scores) / count($scores), 2);
     }
 }

@@ -4,15 +4,25 @@ namespace App\ValueObjects;
 
 use JsonSerializable;
 
-class TrendAnalysis implements JsonSerializable
+/**
+ * Trend analysis for author analytics.
+ */
+class AuthorTrendAnalysis implements JsonSerializable
 {
     public function __construct(
-        public readonly string $improvementStatus, // 'improved', 'stable', 'declined'
-        public readonly array $recurringMistakes, // string[]
+        public readonly string $improvementStatus,
+        public readonly array $recurringMistakes,
     ) {}
 
-    public static function fromArray(array $data): self
+    public static function fromArray(?array $data): self
     {
+        if (empty($data)) {
+            return new self(
+                improvementStatus: 'stable',
+                recurringMistakes: [],
+            );
+        }
+
         return new self(
             improvementStatus: $data['improvement_status'] ?? 'stable',
             recurringMistakes: $data['recurring_mistakes'] ?? [],
@@ -27,7 +37,7 @@ class TrendAnalysis implements JsonSerializable
         ];
     }
 
-    public function getImprovementStatusColor(): string
+    public function getImprovementColor(): string
     {
         return match ($this->improvementStatus) {
             'improved' => 'success',

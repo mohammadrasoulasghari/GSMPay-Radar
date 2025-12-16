@@ -4,16 +4,27 @@ namespace App\ValueObjects;
 
 use JsonSerializable;
 
-class EngagementMetrics implements JsonSerializable
+/**
+ * Engagement metrics for reviewer analytics.
+ */
+class ReviewerEngagementMetrics implements JsonSerializable
 {
     public function __construct(
         public readonly int $totalComments,
-        public readonly float $nitpickingRatio, // 0.0 to 1.0
-        public readonly string $responseSpeedRating, // 'fast', 'normal', 'slow'
+        public readonly float $nitpickingRatio,
+        public readonly string $responseSpeedRating,
     ) {}
 
-    public static function fromArray(array $data): self
+    public static function fromArray(?array $data): self
     {
+        if (empty($data)) {
+            return new self(
+                totalComments: 0,
+                nitpickingRatio: 0.0,
+                responseSpeedRating: 'normal',
+            );
+        }
+
         return new self(
             totalComments: (int) ($data['total_comments'] ?? 0),
             nitpickingRatio: (float) ($data['nitpicking_ratio'] ?? 0.0),
@@ -30,15 +41,6 @@ class EngagementMetrics implements JsonSerializable
         ];
     }
 
-    public function getNitpickingColor(): string
-    {
-        return match (true) {
-            $this->nitpickingRatio <= 0.3 => 'success',
-            $this->nitpickingRatio <= 0.6 => 'warning',
-            default => 'danger',
-        };
-    }
-
     public function getResponseSpeedColor(): string
     {
         return match ($this->responseSpeedRating) {
@@ -46,6 +48,15 @@ class EngagementMetrics implements JsonSerializable
             'normal' => 'warning',
             'slow' => 'danger',
             default => 'gray',
+        };
+    }
+
+    public function getNitpickingColor(): string
+    {
+        return match (true) {
+            $this->nitpickingRatio <= 0.2 => 'success',
+            $this->nitpickingRatio <= 0.4 => 'warning',
+            default => 'danger',
         };
     }
 }

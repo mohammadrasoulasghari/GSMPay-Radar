@@ -4,15 +4,25 @@ namespace App\ValueObjects;
 
 use JsonSerializable;
 
-class BehavioralMetrics implements JsonSerializable
+/**
+ * Behavioral metrics for reviewer analytics.
+ */
+class ReviewerBehavioralMetrics implements JsonSerializable
 {
     public function __construct(
-        public readonly int $toneScore, // 0 to 100
-        public readonly int $mentorshipScore, // 0 to 100
+        public readonly int $toneScore,
+        public readonly int $mentorshipScore,
     ) {}
 
-    public static function fromArray(array $data): self
+    public static function fromArray(?array $data): self
     {
+        if (empty($data)) {
+            return new self(
+                toneScore: 0,
+                mentorshipScore: 0,
+            );
+        }
+
         return new self(
             toneScore: (int) ($data['tone_score'] ?? 0),
             mentorshipScore: (int) ($data['mentorship_score'] ?? 0),
@@ -27,11 +37,11 @@ class BehavioralMetrics implements JsonSerializable
         ];
     }
 
-    public function getToneScoreColor(): string
+    public function getToneColor(): string
     {
         return match (true) {
             $this->toneScore >= 80 => 'success',
-            $this->toneScore >= 60 => 'warning',
+            $this->toneScore >= 50 => 'warning',
             default => 'danger',
         };
     }
@@ -39,8 +49,8 @@ class BehavioralMetrics implements JsonSerializable
     public function getMentorshipColor(): string
     {
         return match (true) {
-            $this->mentorshipScore >= 70 => 'success',
-            $this->mentorshipScore >= 40 => 'warning',
+            $this->mentorshipScore >= 80 => 'success',
+            $this->mentorshipScore >= 50 => 'warning',
             default => 'danger',
         };
     }

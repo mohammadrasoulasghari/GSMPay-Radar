@@ -4,7 +4,10 @@ namespace App\ValueObjects;
 
 use JsonSerializable;
 
-class CategoryBreakdown implements JsonSerializable
+/**
+ * Category breakdown for reviewer analytics.
+ */
+class ReviewerCategoryBreakdown implements JsonSerializable
 {
     public function __construct(
         public readonly int $codeStyle,
@@ -14,8 +17,18 @@ class CategoryBreakdown implements JsonSerializable
         public readonly int $other,
     ) {}
 
-    public static function fromArray(array $data): self
+    public static function fromArray(?array $data): self
     {
+        if (empty($data)) {
+            return new self(
+                codeStyle: 0,
+                architectureDesign: 0,
+                security: 0,
+                productRequirement: 0,
+                other: 0,
+            );
+        }
+
         return new self(
             codeStyle: (int) ($data['code_style'] ?? 0),
             architectureDesign: (int) ($data['architecture_design'] ?? 0),
@@ -38,7 +51,8 @@ class CategoryBreakdown implements JsonSerializable
 
     public function getTotal(): int
     {
-        return $this->codeStyle + $this->architectureDesign + $this->security + $this->productRequirement + $this->other;
+        return $this->codeStyle + $this->architectureDesign + $this->security 
+            + $this->productRequirement + $this->other;
     }
 
     public function toChartData(): array

@@ -4,60 +4,55 @@ namespace App\ValueObjects;
 
 use JsonSerializable;
 
+/**
+ * Technical debt analysis.
+ */
 class TechnicalDebtAnalysis implements JsonSerializable
 {
     public function __construct(
-        public readonly int $score,
-        public readonly int $lineCount,
-        public readonly int $complexityCount,
-        public readonly int $duplicateCount,
-        public readonly array $recommendations,
+        public readonly string $addedDebtLevel,
+        public readonly bool $overEngineeringDetected,
+        public readonly array $suggestionsForRefactor,
     ) {}
 
-    public static function fromArray(array $data): self
+    public static function fromArray(?array $data): self
     {
+        if (empty($data)) {
+            return new self(
+                addedDebtLevel: 'none',
+                overEngineeringDetected: false,
+                suggestionsForRefactor: [],
+            );
+        }
+
         return new self(
-            score: (int) ($data['score'] ?? 0),
-            lineCount: (int) ($data['line_count'] ?? 0),
-            complexityCount: (int) ($data['complexity_count'] ?? 0),
-            duplicateCount: (int) ($data['duplicate_count'] ?? 0),
-            recommendations: $data['recommendations'] ?? [],
+            addedDebtLevel: $data['added_debt_level'] ?? 'none',
+            overEngineeringDetected: (bool) ($data['over_engineering_detected'] ?? false),
+            suggestionsForRefactor: $data['suggestions_for_refactor'] ?? [],
         );
     }
 
     public function jsonSerialize(): array
     {
         return [
-            'score' => $this->score,
-            'line_count' => $this->lineCount,
-            'complexity_count' => $this->complexityCount,
-            'duplicate_count' => $this->duplicateCount,
-            'recommendations' => $this->recommendations,
+            'added_debt_level' => $this->addedDebtLevel,
+            'over_engineering_detected' => $this->overEngineeringDetected,
+            'suggestions_for_refactor' => $this->suggestionsForRefactor,
         ];
     }
 
-    public function getRiskLevel(): string
+    public function getDebtLevelColor(): string
     {
-        return match (true) {
-            $this->score >= 80 => 'low',
-            $this->score >= 60 => 'medium',
-            $this->score >= 40 => 'high',
-            default => 'critical',
-        };
-    }
-
-    public function getRiskColor(): string
-    {
-        return match ($this->getRiskLevel()) {
-            'low' => 'success',
-            'medium' => 'warning',
+        return match ($this->addedDebtLevel) {
+            'none' => 'success',
+            'low' => 'warning',
             'high' => 'danger',
-            'critical' => 'danger',
+            default => 'gray',
         };
     }
 
-    public function getTotalIssues(): int
+    public function hasSuggestions(): bool
     {
-        return $this->lineCount + $this->complexityCount + $this->duplicateCount;
+        return !empty($this->suggestionsForRefactor);
     }
 }
