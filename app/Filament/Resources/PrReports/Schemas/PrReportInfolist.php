@@ -190,7 +190,6 @@ class PrReportInfolist
                     ->hidden(fn ($record) => !empty($record->getReviewersAnalytics()))
                     ->columnSpanFull(),
 
-                // Technical Debt
                 TextEntry::make('over_engineering_alert')
                     ->label(__('pr_report.over_engineering'))
                     ->formatStateUsing(fn () => '⚠️ ' . __('pr_report.over_engineering_message'))
