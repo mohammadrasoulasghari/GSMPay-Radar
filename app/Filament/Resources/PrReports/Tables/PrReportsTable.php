@@ -26,7 +26,8 @@ class PrReportsTable
                     ->searchable(),
                 TextColumn::make('pr_link')
                     ->label(__('pr_report.pr_link'))
-                    ->searchable(),
+                    ->url(fn ($record) => $record->pr_link)
+                    ->openUrlInNewTab(),
                 TextColumn::make('title')
                     ->label(__('pr_report.title'))
                     ->searchable(),
@@ -44,21 +45,33 @@ class PrReportsTable
                     ->sortable(),
                 TextColumn::make('health_status')
                     ->label(__('pr_report.health_status'))
-                    ->searchable(),
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'critical' => 'danger',
+                        'warning' => 'warning',
+                        'healthy' => 'success',
+                        default => 'gray',
+                    }),
                 TextColumn::make('risk_level')
                     ->label(__('pr_report.risk_level'))
-                    ->searchable(),
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'high' => 'danger',
+                        'medium' => 'warning',
+                        'low' => 'success',
+                        default => 'gray',
+                    }),
                 TextColumn::make('change_type')
                     ->label(__('pr_report.change_type'))
-                    ->searchable(),
+                    ->badge(),
                 TextColumn::make('created_at')
                     ->label(__('pr_report.created_at'))
-                    ->dateTime()
+                    ->dateTime('M d, Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label(__('pr_report.updated_at'))
-                    ->dateTime()
+                    ->dateTime('M d, Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
