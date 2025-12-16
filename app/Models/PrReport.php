@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ValueObjects\AiAnalysis;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,6 +39,18 @@ class PrReport extends Model
     public function developer(): BelongsTo
     {
         return $this->belongsTo(Developer::class);
+    }
+
+    /**
+     * Get the AI analysis as a Value Object.
+     */
+    public function getAiAnalysis(): ?AiAnalysis
+    {
+        if (empty($this->raw_analysis) || !is_array($this->raw_analysis)) {
+            return null;
+        }
+
+        return AiAnalysis::fromArray($this->raw_analysis);
     }
 
     /**
@@ -78,12 +91,17 @@ class PrReport extends Model
     public static function extractMetrics(array $aiAnalysis): array
     {
         return [
-            'business_value_score' => (int) ($aiAnalysis['business_value_clarity'] ?? 0),
-            'solid_compliance_score' => (int) ($aiAnalysis['solid_compliance_score'] ?? 0),
+            'business_value_score' => (int) ($aiAnalysis['classification']['business_value'] ?? 
+                                           $aiAnalysis['business_value_clarity'] ?? 0),
+            'solid_compliance_score' => (int) ($aiAnalysis['quality_metrics']['solid_compliance'] ?? 
+                                             $aiAnalysis['solid_compliance_score'] ?? 0),
             'tone_score' => self::calculateToneScore($aiAnalysis),
-            'health_status' => $aiAnalysis['health_status'] ?? 'unknown',
-            'risk_level' => $aiAnalysis['risk_level'] ?? 'unknown',
-            'change_type' => $aiAnalysis['change_type'] ?? 'unknown',
+            'health_status' => $aiAnalysis['classification']['health_status'] ?? 
+                             $aiAnalysis['health_status'] ?? 'unknown',
+            'risk_level' => $aiAnalysis['classification']['risk_level'] ?? 
+                          $aiAnalysis['risk_level'] ?? 'unknown',
+            'change_type' => $aiAnalysis['classification']['change_type'] ?? 
+                           $aiAnalysis['change_type'] ?? 'unknown',
         ];
     }
 
@@ -184,6 +202,11 @@ class PrReport extends Model
      */
     public function getBadges(): array
     {
+        $analysis = $this->getAiAnalysis();
+        if ($analysis && $analysis->hasGamificationBadges()) {
+            return array_map(fn($badge) => $badge->jsonSerialize(), $analysis->gamificationBadges);
+        }
+        
         return $this->raw_analysis['badges'] ?? [];
     }
 
@@ -192,6 +215,11 @@ class PrReport extends Model
      */
     public function getRecurringMistakes(): array
     {
+        $analysis = $this->getAiAnalysis();
+        if ($analysis) {
+            return $analysis->educationalRecommendation->recurringMistakes;
+        }
+        
         return $this->raw_analysis['recurring_mistakes'] ?? [];
     }
 
@@ -200,6 +228,11 @@ class PrReport extends Model
      */
     public function getEducationalPath(): array
     {
+        $analysis = $this->getAiAnalysis();
+        if ($analysis) {
+            return $analysis->educationalRecommendation->educationalPath;
+        }
+        
         return $this->raw_analysis['educational_path'] ?? [];
     }
 
@@ -208,6 +241,11 @@ class PrReport extends Model
      */
     public function getReviewersAnalytics(): array
     {
+        $analysis = $this->getAiAnalysis();
+        if ($analysis) {
+            return array_map(fn($reviewer) => $reviewer->jsonSerialize(), $analysis->reviewersAnalytics);
+        }
+        
         return $this->raw_analysis['reviewers_analytics'] ?? [];
     }
 
@@ -216,6 +254,11 @@ class PrReport extends Model
      */
     public function getRefactoringSuggestions(): array
     {
+        $analysis = $this->getAiAnalysis();
+        if ($analysis) {
+            return $analysis->educationalRecommendation->suggestions;
+        }
+        
         return $this->raw_analysis['suggestions_for_refactor'] ?? [];
     }
 
@@ -224,6 +267,11 @@ class PrReport extends Model
      */
     public function isOverEngineered(): bool
     {
+        $analysis = $this->getAiAnalysis();
+        if ($analysis) {
+            return $analysis->classification->overEngineering;
+        }
+        
         return ($this->raw_analysis['over_engineering'] ?? false) === true;
     }
 
@@ -232,6 +280,11 @@ class PrReport extends Model
      */
     public function getTestCoverage(): ?int
     {
+        $analysis = $this->getAiAnalysis();
+        if ($analysis) {
+            return $analysis->qualityMetrics->testCoverage;
+        }
+        
         return $this->raw_analysis['test_coverage_percentage'] ?? null;
     }
 
@@ -240,6 +293,11 @@ class PrReport extends Model
      */
     public function getVelocity(): ?string
     {
+        $analysis = $this->getAiAnalysis();
+        if ($analysis) {
+            return $analysis->velocityMetrics->velocity;
+        }
+        
         return $this->raw_analysis['velocity'] ?? null;
     }
 }
