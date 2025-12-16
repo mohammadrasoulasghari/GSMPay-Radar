@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Developers\RelationManagers;
 
 use App\Filament\Resources\PrReports\PrReportResource;
 use App\Models\Developer;
+use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -69,7 +70,7 @@ class PrReportsRelationManager extends RelationManager
                 // Read-only: no create action
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->url(fn ($record) => PrReportResource::getUrl('view', ['record' => $record])),
             ])
             ->bulkActions([

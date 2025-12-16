@@ -14,12 +14,10 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
-use Filament\Infolists;
-use Filament\Infolists\Components\Grid as InfolistGrid;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -116,7 +114,7 @@ class DeveloperResource extends Resource
             ->components([
                 Section::make(__('developer.profile_info'))
                     ->schema([
-                        InfolistGrid::make(3)
+                       Grid::make(3)
                             ->schema([
                                 ImageEntry::make('avatar_url')
                                     ->label('')
