@@ -14,13 +14,16 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -42,15 +45,15 @@ class DeveloperResource extends Resource
     {
         return $schema
             ->components([
-                Forms\Components\TextInput::make('username')
+                TextInput::make('username')
                     ->label(__('developer.username'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->label(__('developer.name'))
                     ->maxLength(255),
-                Forms\Components\TextInput::make('avatar_url')
+                TextInput::make('avatar_url')
                     ->label(__('developer.avatar_url'))
                     ->url()
                     ->maxLength(500),
@@ -111,29 +114,90 @@ class DeveloperResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make('پروفایل')
+                Section::make('پروفایل توسعه‌دهنده')
                     ->schema([
-                        ImageEntry::make('avatar_url')
-                            ->label('آواتار')
-                            ->circular()
-                            ->size(100)
-                            ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name ?? $record->username) . '&background=6366f1&color=fff&size=200'),
-
                         TextEntry::make('name')
                             ->label('نام')
-                            ->default(fn ($record) => $record->name ?? '-'),
+                            ->default(fn ($record) => $record->name ?? $record->username)
+                            ->weight(FontWeight::Bold),
 
                         TextEntry::make('username')
-                            ->label('نام کاربری')
+                            ->label('نام کاربری GitHub')
                             ->icon('heroicon-m-at-symbol')
                             ->iconColor('gray')
+                            ->prefix('@')
                             ->url(fn ($record) => "https://github.com/{$record->username}")
-                            ->openUrlInNewTab(),
+                            ->openUrlInNewTab()
+                            ->color('primary'),
 
                         TextEntry::make('created_at')
                             ->label('عضو از')
-                            ->dateTime('F Y'),
-                    ])->columns(1),
+                            ->dateTime('F Y')
+                            ->icon('heroicon-m-calendar')
+                            ->iconColor('gray'),
+
+                        TextEntry::make('pr_reports_count')
+                            ->label('تعداد گزارش‌های PR')
+                            ->state(fn ($record) => $record->prReports()->count())
+                            ->icon('heroicon-m-document-text')
+                            ->iconColor('primary'),
+                    ])
+                    ->columns([
+                        'sm' => 1,
+                        'md' => 2,
+                        'lg' => 4
+                    ])
+                    ->compact()
+                    ->extraAttributes(['class' => 'bg-white dark:bg-gray-900 shadow-sm']),
+
+                Section::make('آمار و تحلیل')
+                    ->schema([
+                        TextEntry::make('latest_pr')
+                            ->label('آخرین PR')
+                            ->state(fn ($record) => $record->prReports()->latest()->first()?->created_at?->diffForHumans() ?? 'فعالیتی موجود نیست')
+                            ->icon('heroicon-m-clock')
+                            ->iconColor('green'),
+
+                        TextEntry::make('avg_tone_score')
+                            ->label('میانگین امتیاز لحن')
+                            ->state(fn ($record) => $record->getAverageToneScore() ? number_format($record->getAverageToneScore(), 1) : 'محاسبه نشده')
+                            ->icon('heroicon-m-chat-bubble-left-ellipsis')
+                            ->iconColor('blue'),
+
+                        TextEntry::make('compliance_rate')
+                            ->label('نرخ انطباق')
+                            ->state(fn ($record) => $record->getAverageComplianceRate() ? number_format($record->getAverageComplianceRate(), 1) . '%' : 'محاسبه نشده')
+                            ->icon('heroicon-m-check-badge')
+                            ->iconColor('emerald'),
+
+                        TextEntry::make('health_status')
+                            ->label('وضعیت سلامت')
+                            ->state(fn ($record) => match($record->getOverallHealthStatus()) {
+                                'healthy' => 'سالم',
+                                'warning' => 'هشدار', 
+                                'critical' => 'بحرانی',
+                                default => 'نامشخص'
+                            })
+                            ->icon(fn ($record) => match($record->getOverallHealthStatus()) {
+                                'healthy' => 'heroicon-m-heart',
+                                'warning' => 'heroicon-m-exclamation-triangle',
+                                'critical' => 'heroicon-m-x-circle',
+                                default => 'heroicon-m-question-mark-circle'
+                            })
+                            ->color(fn ($record) => match($record->getOverallHealthStatus()) {
+                                'healthy' => 'success',
+                                'warning' => 'warning',
+                                'critical' => 'danger',
+                                default => 'gray'
+                            }),
+                    ])
+                    ->columns([
+                        'sm' => 1,
+                        'md' => 2,
+                        'lg' => 4
+                    ])
+                    ->compact()
+                    ->extraAttributes(['class' => 'bg-gray-50 dark:bg-gray-800 shadow-sm']),
             ]);
     }
 
