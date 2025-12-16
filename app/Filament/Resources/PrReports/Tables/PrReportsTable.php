@@ -17,17 +17,20 @@ class PrReportsTable
             ->columns([
                 TextColumn::make('developer.name')
                     ->label(__('developer.name'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('repository')
                     ->label(__('pr_report.repository'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('pr_number')
                     ->label(__('pr_report.pr_number'))
                     ->searchable(),
                 TextColumn::make('pr_link')
                     ->label(__('pr_report.pr_link'))
                     ->url(fn ($record) => $record->pr_link)
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
                     ->label(__('pr_report.title'))
                     ->searchable(),
@@ -38,11 +41,13 @@ class PrReportsTable
                 TextColumn::make('solid_compliance_score')
                     ->label(__('pr_report.solid_compliance'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tone_score')
                     ->label(__('pr_report.tone_score'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('health_status')
                     ->label(__('pr_report.health_status'))
                     ->badge()
@@ -51,7 +56,8 @@ class PrReportsTable
                         'warning' => 'warning',
                         'healthy' => 'success',
                         default => 'gray',
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('risk_level')
                     ->label(__('pr_report.risk_level'))
                     ->badge()
@@ -60,7 +66,8 @@ class PrReportsTable
                         'medium' => 'warning',
                         'low' => 'success',
                         default => 'gray',
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('change_type')
                     ->label(__('pr_report.change_type'))
                     ->badge(),
