@@ -11,11 +11,9 @@ use Illuminate\Support\Facades\Cache;
 
 class RiskRadarWidget extends BaseWidget
 {
-    protected static ?string $pollingInterval = '30s';
+    protected ?string $pollingInterval = '30s';
 
     protected int|string|array $columnSpan = 2;
-
-    protected static ?string $heading = null;
 
     public function getTableHeading(): ?string
     {

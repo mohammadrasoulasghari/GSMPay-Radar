@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 
 class TeamPulseStatsWidget extends StatsOverviewWidget
 {
-    protected static ?string $pollingInterval = '30s';
+    protected ?string $pollingInterval = '30s';
 
     protected int|string|array $columnSpan = 'full';
 

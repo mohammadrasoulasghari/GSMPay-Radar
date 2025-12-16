@@ -9,9 +9,9 @@ use Illuminate\View\View;
 
 class EngagementLeaderboardWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.engagement-leaderboard-widget';
+    protected string $view = 'filament.widgets.engagement-leaderboard-widget';
 
-    protected static ?string $pollingInterval = '30s';
+    protected ?string $pollingInterval = '30s';
 
     protected int|string|array $columnSpan = 'full';
 
