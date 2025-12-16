@@ -133,7 +133,7 @@ class DeveloperResource extends Resource
                         TextEntry::make('created_at')
                             ->label('عضو از')
                             ->dateTime('F Y'),
-                    ])->columns(2),
+                    ])->columns(1),
             ]);
     }
 
