@@ -15,6 +15,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists;
+use Filament\Infolists\Components\Grid as InfolistGrid;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
@@ -24,7 +25,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
-use Filament\Tables\Columns\Layout\Grid;
 use Filament\Tables\Table;
 
 class DeveloperResource extends Resource
@@ -116,7 +116,7 @@ class DeveloperResource extends Resource
             ->components([
                 Section::make(__('developer.profile_info'))
                     ->schema([
-                        Grid::make(3)
+                        InfolistGrid::make(3)
                             ->schema([
                                 ImageEntry::make('avatar_url')
                                     ->label('')
