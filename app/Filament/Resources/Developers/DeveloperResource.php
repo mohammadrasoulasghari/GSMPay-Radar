@@ -17,12 +17,11 @@ use Filament\Forms;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class DeveloperResource extends Resource
@@ -62,24 +61,24 @@ class DeveloperResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('avatar_url')
+                ImageColumn::make('avatar_url')
                     ->label('')
                     ->circular()
                     ->size(40)
                     ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name ?? $record->username)),
-                Tables\Columns\TextColumn::make('username')
+                TextColumn::make('username')
                     ->label(__('developer.username'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label(__('developer.name'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('pr_reports_count')
+                TextColumn::make('pr_reports_count')
                     ->label(__('developer.total_reports'))
                     ->counts('prReports')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('prReports.created_at')
+                TextColumn::make('prReports.created_at')
                     ->label(__('developer.last_activity'))
                     ->getStateUsing(fn ($record) => $record->prReports()->latest()->first()?->created_at)
                     ->dateTime('M d, Y')
@@ -87,7 +86,7 @@ class DeveloperResource extends Resource
                         return $query->withMax('prReports', 'created_at')
                             ->orderBy('pr_reports_max_created_at', $direction);
                     }),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('developer.created_at'))
                     ->dateTime('M d, Y')
                     ->sortable()
@@ -111,30 +110,30 @@ class DeveloperResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                Section::make(__('developer.profile_info'))
+            ->schema([
+                Section::make('پروفایل')
                     ->schema([
-                       Grid::make(3)
-                            ->schema([
-                                ImageEntry::make('avatar_url')
-                                    ->label('')
-                                    ->circular()
-                                    ->size(80)
-                                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name ?? $record->username)),
-                                Group::make([
-                                    TextEntry::make('name')
-                                        ->label(__('developer.name'))
-//                                        ->size(TextEntrySize::Large)
-                                        ->weight('bold'),
-                                    TextEntry::make('username')
-                                        ->label(__('developer.username'))
-                                        ->icon('heroicon-o-at-symbol')
-                                        ->url(fn ($record) => "https://github.com/{$record->username}")
-                                        ->openUrlInNewTab(),
-                                ])->columnSpan(2),
-                            ]),
-                    ])
-                    ->collapsible(false),
+                        ImageEntry::make('avatar_url')
+                            ->label('آواتار')
+                            ->circular()
+                            ->size(100)
+                            ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name ?? $record->username) . '&background=6366f1&color=fff&size=200'),
+
+                        TextEntry::make('name')
+                            ->label('نام')
+                            ->default(fn ($record) => $record->name ?? '-'),
+
+                        TextEntry::make('username')
+                            ->label('نام کاربری')
+                            ->icon('heroicon-m-at-symbol')
+                            ->iconColor('gray')
+                            ->url(fn ($record) => "https://github.com/{$record->username}")
+                            ->openUrlInNewTab(),
+
+                        TextEntry::make('created_at')
+                            ->label('عضو از')
+                            ->dateTime('F Y'),
+                    ])->columns(2),
             ]);
     }
 
